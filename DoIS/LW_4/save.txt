@@ -1,0 +1,77 @@
+class Individual(list):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.fitness = FitnessMin()
+
+
+class FitnessMin:
+    def __init__(self):
+        self.values = [0]
+
+
+"""
+Индивид - состоит из 784 хромосом
+Хромосома состоит из 2 генов 
+"""
+
+class GA:
+    def __init__(self,
+                 size_population,
+                 weights_old,
+                 mutation,
+                 max_generation,
+                 crossover_per=1):
+
+        self.max_generation = max_generation
+        self.mutation = mutation
+        self.crossover_per = crossover_per
+        self.size_population = size_population
+        self.count_chrom = 28*28
+        self.len_chrom = 2
+
+        self.minFitnessValues = []
+        self.meanFitnessValues = []
+        self.best_ind = []
+        self.population = []
+        self.generationCounter = 0
+        self.list_population = []
+        self.statistics_generation = []
+
+        self.checkStep = 0
+        self.log_step = ''
+
+    def chrom_create(self):
+        return np.random.uniform(-1, 1, size=2)
+
+    def individual_create(self):
+        """Генерация индивидуума"""
+        return Individual([[self.chrom_create() for _ in range(self.count_chrom)]])
+
+    def population_create(self):
+        """ Создание популяции"""
+        return list([self.individual_create() for _ in range(self.size_population)])\
+        
+
+    def crossover(self, p1, p2):
+        children_1 = []
+        children_2 = []
+        
+        for chrom_1, chrom_2 in zip(p1[0], p2[0]):
+            if random.random() > self.crossover_per:
+                children_1.append(chrom_1)
+                children_2.append(chrom_2)
+            else:
+                new_chrom_1 = []
+                new_chrom_2 = []
+                for gen_1, gen_2 in zip(chrom_1, chrom_2):
+                    if gen_1<gen_2:
+                        new_chrom_1.append(np.array(np.random.uniform(gen_1, gen_2, size=1)[0]))
+                        new_chrom_2.append(np.array(np.random.uniform(gen_1, gen_2, size=1)[0]))
+
+                    else:
+                        new_chrom_1.append(np.array(np.random.uniform(gen_2, gen_1, size=1)[0]))
+                        new_chrom_2.append(np.array(np.random.uniform(gen_2, gen_1, size=1)[0]))
+                        
+                children_1.append(np.array(new_chrom_1))
+                children_2.append(np.array(new_chrom_2))
+        return [children_1], [children_2]
